@@ -26,6 +26,7 @@ export interface ConfigurableProfilePermissions {
   isProfileVisible?: PublicVisibilitySettings;
   isAboutVisible?: VisibilitySettings;
   isEducationVisible?: VisibilitySettings;
+  isEmploymentHistoryVisible?: VisibilitySettings;
   isEnglishVisible?: PartialStudentVisibilitySettings;
   isEmailVisible?: ContactsVisibilitySettings;
   isTelegramVisible?: ContactsVisibilitySettings;
@@ -45,6 +46,20 @@ export interface GeneralInfo {
   location: Location;
   educationHistory?: any | null;
   englishLevel?: EnglishLevel | null;
+}
+
+export interface EmploymentRecord {
+  placeOfWork: string;
+  position: string;
+  startDate: string;
+  finishDate: string | null
+}
+
+export interface OpportunitiesInfo {
+  employmentHistory: EmploymentRecord[];
+  selfIntroLink: string;
+  cvLink: string;
+  militaryService: string;
 }
 
 export interface Contacts {
@@ -159,6 +174,7 @@ export interface UserInfo {
 export interface ProfileInfo {
   permissionsSettings?: ConfigurableProfilePermissions;
   generalInfo?: GeneralInfo;
+  opportunitiesInfo?: OpportunitiesInfo;
   contacts?: Contacts;
   consents?: Consent[];
   mentorStats?: MentorStats[];
