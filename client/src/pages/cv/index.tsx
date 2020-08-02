@@ -121,6 +121,12 @@ class CVPage extends React.Component<Props, State> {
     return sections.filter((section: any) => section !== null);
   }
 
+  private formatDate(dateStr: string) {
+    if (dateStr === 'currently') return 'Currently working';
+    const [month, year] = dateStr.split('-');
+    return `${month} / ${year}`;
+  }
+
   private userService = new UserService();
 
   async componentDidMount() {
@@ -128,7 +134,7 @@ class CVPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { coreInfo, contacts, educationHistory } = this.state;
+    const { coreInfo, contacts, educationHistory, employmentHistory } = this.state;
 
     const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
 
@@ -179,7 +185,23 @@ class CVPage extends React.Component<Props, State> {
         }
       : null;
 
-    const sections = [aboutSection, educationSection];
+    const employmentSection = employmentHistory?.length
+      ? {
+          type: 'common-list',
+          title: 'Employment history',
+          icon: 'archive',
+          items: employmentHistory.map((employmentRecord: EmploymentRecord) => {
+            const { placeOfWork, position, startDate, finishDate } = employmentRecord;
+
+            return {
+              title: `${placeOfWork}/${position}`,
+              rightSide: `${this.formatDate(startDate as string)} - ${this.formatDate(finishDate as string)}`,
+            };
+          }),
+        }
+      : null;
+
+    const sections = [aboutSection, educationSection, employmentSection];
 
     return (
       <>
