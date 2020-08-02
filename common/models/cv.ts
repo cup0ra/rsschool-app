@@ -17,6 +17,11 @@ export interface EducationRecord {
   university: string;
 }
 
+export interface Location {
+  cityName: string;
+  countryName: string;
+}
+
 export interface EmploymentRecord {
   placeOfWork: string | null;
   position: string | null;
@@ -50,7 +55,7 @@ export interface CoursesStats {
 
 export interface CoreCVInfo {
   name: string | null;
-  location: string | null
+  location: Location | null
   githubId: string | null;
   englishLevel: EnglishLevel | null;
   about: string | null;
