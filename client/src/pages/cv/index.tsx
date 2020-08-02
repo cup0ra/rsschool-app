@@ -1,14 +1,20 @@
 import * as React from 'react';
-import { Layout, Typography } from 'antd';
+import { Layout } from 'antd';
 import { NextRouter, withRouter } from 'next/router';
 import withSession, { Session } from 'components/withSession';
 import { LoadingScreen } from 'components/LoadingScreen';
 import { UserService } from 'services/user';
-import { Contacts, EmploymentRecord, CoursesStats, PublicFeedback, CoreCVInfo } from '../../../../common/models/cv';
+import {
+  Contacts,
+  EmploymentRecord,
+  EducationRecord,
+  CoursesStats,
+  PublicFeedback,
+  CoreCVInfo,
+} from '../../../../common/models/cv';
 import CV from 'react-cv';
 
 const { Content } = Layout;
-const { Title } = Typography;
 
 const mockOpportunitiesData = {
   selfIntroLink: 'htpps://linktoselfintro.com',
@@ -65,9 +71,9 @@ class CVPage extends React.Component<Props, State> {
       const profile = await this.userService.getProfileInfo(githubId);
 
       const generalInfo = profile?.generalInfo;
-      const contacts = profile?.contacts ? profile?.contacts : null;
-      const studentStats = profile?.studentStats ? profile?.studentStats : null;
-      const publicFeedback = profile?.publicFeedback ? profile?.publicFeedback : null;
+      const contacts = profile?.contacts ? profile.contacts : null;
+      const studentStats = profile?.studentStats ? profile.studentStats : null;
+      const publicFeedback = profile?.publicFeedback ? profile.publicFeedback : null;
 
       const about = generalInfo?.aboutMyself;
       const educationHistory = generalInfo?.educationHistory;
@@ -98,7 +104,6 @@ class CVPage extends React.Component<Props, State> {
         coursesStats: studentStats,
         educationHistory,
       });
-      console.log(profile);
     } catch (e) {
       await this.setState({
         isLoading: false,
@@ -112,6 +117,10 @@ class CVPage extends React.Component<Props, State> {
     }
   }
 
+  private getExistingSections(sections: any) {
+    return sections.filter((section: any) => section !== null);
+  }
+
   private userService = new UserService();
 
   async componentDidMount() {
@@ -119,16 +128,65 @@ class CVPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { router } = this.props;
+    const { coreInfo, contacts, educationHistory } = this.state;
 
-    const githubId = router.query ? (router.query.githubId as string) : undefined;
+    const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
+
+    const contactsTransformed = contacts
+      ? Object.entries(contacts as object)
+          .filter(contact => {
+            const [type, value] = contact;
+            const isContactAllowed = allowedContacts.includes(type);
+            const isContactFilled = value !== null;
+            return isContactAllowed && isContactFilled;
+          })
+          .map(contact => {
+            const [type, value] = contact;
+            return {
+              type,
+              value,
+            };
+          })
+      : [];
+
+    const personalData = {
+      title: '',
+      name: coreInfo?.name,
+      image: `https://github.com/${coreInfo?.githubId}.png?size=96`,
+      contacts: contactsTransformed,
+    };
+
+    const aboutSection = {
+      type: 'text',
+      title: 'About me',
+      content: coreInfo?.about || "There's no info",
+      icon: 'usertie',
+    };
+
+    const educationSection = educationHistory?.length
+      ? {
+          type: 'common-list',
+          title: 'Education history',
+          icon: 'graduation',
+          items: educationHistory.map((educationRecord: EducationRecord) => {
+            const { university, graduationYear, faculty } = educationRecord;
+
+            return {
+              title: `${university}/${faculty}`,
+              rightSide: `Graduation in ${graduationYear}`,
+            };
+          }),
+        }
+      : null;
+
+    const sections = [aboutSection, educationSection];
 
     return (
       <>
         <LoadingScreen show={this.state.isLoading}>
           <Layout style={{ textAlign: 'center' }}>
             <Content>
-              <Title>CV of {githubId}</Title>
+              <CV personalData={personalData} sections={this.getExistingSections(sections)} branding={false} />
             </Content>
           </Layout>
         </LoadingScreen>
