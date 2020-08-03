@@ -127,6 +127,25 @@ class CVPage extends React.Component<Props, State> {
     return `${month} / ${year}`;
   }
 
+  private getBadgesGeneralInfo(badges: PublicFeedback[]) {
+    const uniqueBadgesSummarized = badges.reduce((uniqueBadges, badge) => {
+      const { badgeId } = badge;
+      if (uniqueBadges[badgeId]) {
+        uniqueBadges[badgeId]++;
+      } else {
+        uniqueBadges[badgeId] = 1;
+      }
+      return uniqueBadges;
+    }, {} as any);
+
+    const badgesFormatted = Object.entries(uniqueBadgesSummarized).map(entry => {
+      const [badgeId, badgeCount] = entry;
+      return `${badgeId}: ${badgeCount}`;
+    });
+
+    return badgesFormatted;
+  }
+
   private userService = new UserService();
 
   async componentDidMount() {
@@ -134,7 +153,7 @@ class CVPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { coreInfo, contacts, educationHistory, employmentHistory } = this.state;
+    const { coreInfo, contacts, educationHistory, employmentHistory, badges } = this.state;
 
     const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
 
@@ -201,7 +220,16 @@ class CVPage extends React.Component<Props, State> {
         }
       : null;
 
-    const sections = [aboutSection, educationSection, employmentSection];
+    const badgesSection = badges?.length
+      ? {
+          type: 'tag-list',
+          title: 'Public feedback',
+          icon: 'comments',
+          items: this.getBadgesGeneralInfo(badges),
+        }
+      : null;
+
+    const sections = [aboutSection, educationSection, employmentSection, badgesSection];
 
     return (
       <>
