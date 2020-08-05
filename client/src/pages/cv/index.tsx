@@ -127,6 +127,42 @@ class CVPage extends React.Component<Props, State> {
     return `${month} / ${year}`;
   }
 
+  private getCoursesGeneralInfo(courses: CoursesStats[]) {
+    const coursesTransformed = courses.map(course => {
+      const {
+        certificateId,
+        courseFullName,
+        isExpelled,
+        locationName,
+        position,
+        isCourseCompleted,
+        totalScore,
+      } = course;
+      const title = `${courseFullName}${locationName ? locationName : ''}`;
+      const authorityWebsite = certificateId ? `https://app.rs.school/certificate/${certificateId}` : null;
+      const authority = certificateId ? 'Certificate' : isCourseCompleted ? 'No certificate' : null;
+      const rightSide = `Score: ${totalScore}/ Position: ${position}`;
+      let authorityMeta;
+      if (isExpelled) {
+        authorityMeta = 'Expelled';
+      } else if (certificateId) {
+        authorityMeta = 'Completed with certificate';
+      } else if (isCourseCompleted) {
+        authorityMeta = 'Completed';
+      } else {
+        authorityMeta = 'In progress';
+      }
+      return {
+        title,
+        authority,
+        authorityWebsite,
+        authorityMeta,
+        rightSide,
+      };
+    });
+    return coursesTransformed;
+  }
+
   private getBadgesGeneralInfo(badges: PublicFeedback[]) {
     const uniqueBadgesSummarized = badges.reduce((uniqueBadges, badge) => {
       const { badgeId } = badge;
@@ -153,7 +189,7 @@ class CVPage extends React.Component<Props, State> {
   }
 
   render() {
-    const { coreInfo, contacts, educationHistory, employmentHistory, badges } = this.state;
+    const { coreInfo, contacts, educationHistory, employmentHistory, badges, coursesStats } = this.state;
 
     const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
 
@@ -229,7 +265,16 @@ class CVPage extends React.Component<Props, State> {
         }
       : null;
 
-    const sections = [aboutSection, educationSection, employmentSection, badgesSection];
+    const coursesSection = coursesStats?.length
+      ? {
+          type: 'common-list',
+          title: 'RSSchool courses',
+          icon: 'tasks',
+          items: this.getCoursesGeneralInfo(coursesStats),
+        }
+      : null;
+
+    const sections = [aboutSection, educationSection, employmentSection, coursesSection, badgesSection];
 
     return (
       <>
