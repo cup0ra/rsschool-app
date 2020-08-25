@@ -5,7 +5,7 @@ import withSession, { Session } from 'components/withSession';
 import { LoadingScreen } from 'components/LoadingScreen';
 import { UserService } from 'services/user';
 import {
-  Contacts,
+  ContactsCV,
   EmploymentRecord,
   EducationRecord,
   CoursesStats,
@@ -44,7 +44,7 @@ type Props = {
 type State = {
   isLoading: boolean;
   coreInfo: CoreCVInfo | null;
-  contacts: Contacts | null;
+  contacts: ContactsCV | null;
   badges: PublicFeedback[] | null;
   educationHistory: any | null;
   employmentHistory: EmploymentRecord[] | null;
@@ -71,34 +71,51 @@ class CVPage extends React.Component<Props, State> {
       const profile = await this.userService.getProfileInfo(githubId);
 
       const generalInfo = profile?.generalInfo;
-      const contacts = profile?.contacts ? profile.contacts : null;
-      const studentStats = profile?.studentStats ? profile.studentStats : null;
-      const publicFeedback = profile?.publicFeedback ? profile.publicFeedback : null;
+      const profileContacts = profile?.contacts ?? null;
+      const studentStats = profile?.studentStats ?? null;
+      const publicFeedback = profile?.publicFeedback ?? null;
 
-      const about = generalInfo?.aboutMyself;
-      const educationHistory = generalInfo?.educationHistory;
-      const englishLevel = generalInfo?.englishLevel;
-      const github = generalInfo?.githubId;
-      const name = generalInfo?.name;
-      const location = generalInfo?.location;
+      const about = generalInfo?.aboutMyself ?? null;
+      const educationHistory = generalInfo?.educationHistory ?? null;
+      const englishLevel = generalInfo?.englishLevel ?? null;
+      const github = generalInfo?.githubId ?? null;
+      const name = generalInfo?.name ?? null;
+      const location = generalInfo?.location ?? null;
 
-      const { selfIntroLink, cvLink, militaryService, employmentHistory } = mockOpportunitiesData;
+      const selfIntroLink = mockOpportunitiesData?.selfIntroLink ?? null;
+      const cvLink = mockOpportunitiesData?.cvLink ?? null;
+      const militaryService = mockOpportunitiesData?.militaryService ?? null;
+      const employmentHistory = mockOpportunitiesData?.employmentHistory ?? null;
 
       const coreInfo = {
-        name: name ? name : null,
-        location: location ? location : null,
-        githubId: github ? github : null,
-        englishLevel: englishLevel ? englishLevel : null,
-        about: about ? about : null,
-        selfIntroLink: selfIntroLink ? selfIntroLink : null,
-        cvLink: cvLink ? cvLink : null,
-        militaryService: militaryService ? militaryService : null,
+        name,
+        location,
+        githubId: github,
+        englishLevel,
+        about,
+        selfIntroLink,
+        cvLink,
+        militaryService,
+      };
+
+      const locationForPersonalData = location ? `${location?.countryName}/ ${location?.cityName}` : null;
+
+      const contactsCV = {
+        skype: profileContacts?.skype ?? null,
+        phone: profileContacts?.phone ?? null,
+        email: profileContacts?.email ?? null,
+        telegram: profileContacts?.telegram ?? null,
+        notes: profileContacts?.notes ?? null,
+        linkedin: profileContacts?.linkedIn ?? null,
+        location: locationForPersonalData,
+        github,
+        website: [cvLink, selfIntroLink],
       };
 
       await this.setState({
         isLoading: false,
         coreInfo,
-        contacts,
+        contacts: contactsCV,
         badges: publicFeedback,
         employmentHistory,
         coursesStats: studentStats,
@@ -163,6 +180,38 @@ class CVPage extends React.Component<Props, State> {
     return coursesTransformed;
   }
 
+  private getContactsData(contacts: any) {
+    const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
+
+    const contactsData: any = [];
+
+    const transformedContacts = Object.entries(contacts as object).filter(contact => {
+      const [type, value] = contact;
+      const isContactAllowed = allowedContacts.includes(type);
+      const isContactFilled = value !== null && value !== '';
+      return isContactAllowed && isContactFilled;
+    });
+
+    transformedContacts.forEach((contact: any) => {
+      const [type, value] = contact;
+      if (typeof value === 'string') {
+        contactsData.push({
+          type,
+          value,
+        });
+      } else {
+        value.forEach((item: any) => {
+          contactsData.push({
+            type,
+            value: item,
+          });
+        });
+      }
+    });
+
+    return contactsData;
+  }
+
   private getBadgesGeneralInfo(badges: PublicFeedback[]) {
     const uniqueBadgesSummarized = badges.reduce((uniqueBadges, badge) => {
       const { badgeId } = badge;
@@ -191,24 +240,7 @@ class CVPage extends React.Component<Props, State> {
   render() {
     const { coreInfo, contacts, educationHistory, employmentHistory, badges, coursesStats } = this.state;
 
-    const allowedContacts = ['email', 'phone', 'location', 'website', 'github', 'linkedin', 'twitter'];
-
-    const contactsTransformed = contacts
-      ? Object.entries(contacts as object)
-          .filter(contact => {
-            const [type, value] = contact;
-            const isContactAllowed = allowedContacts.includes(type);
-            const isContactFilled = value !== null;
-            return isContactAllowed && isContactFilled;
-          })
-          .map(contact => {
-            const [type, value] = contact;
-            return {
-              type,
-              value,
-            };
-          })
-      : [];
+    const contactsTransformed = contacts ? this.getContactsData(contacts) : [];
 
     const personalData = {
       title: '',
