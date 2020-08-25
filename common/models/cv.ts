@@ -7,6 +7,18 @@ export interface Contacts {
   linkedIn: string | null;
 }
 
+export interface ContactsCV {
+  phone: string | null;
+  email: string | null;
+  skype: string | null;
+  telegram: string | null;
+  notes: string | null;
+  linkedin: string | null;
+  location: string | null;
+  github: string | null;
+  website: string | string[] | null;
+}
+
 export type FinishDate = string | null | 'currently';
 
 export type EnglishLevel = 'a0' | 'a1' | 'a1+' | 'a2' | 'a2+' | 'b1' | 'b1+' | 'b2' | 'b2+' | 'c1' | 'c1+' | 'c2';
@@ -55,7 +67,7 @@ export interface CoursesStats {
 
 export interface CoreCVInfo {
   name: string | null;
-  location: Location | null
+  location: Location | null;
   githubId: string | null;
   englishLevel: EnglishLevel | null;
   about: string | null;
