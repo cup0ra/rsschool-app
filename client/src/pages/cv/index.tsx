@@ -18,6 +18,7 @@ const { Content } = Layout;
 
 const mockOpportunitiesData = {
   selfIntroLink: 'htpps://linktoselfintro.com',
+  desiredPosition: 'Middle Fronted Developer',
   cvLink: 'htpps://linktocv.com',
   militaryService: 'served',
   employmentHistory: [
@@ -86,10 +87,12 @@ class CVPage extends React.Component<Props, State> {
       const cvLink = mockOpportunitiesData?.cvLink ?? null;
       const militaryService = mockOpportunitiesData?.militaryService ?? null;
       const employmentHistory = mockOpportunitiesData?.employmentHistory ?? null;
+      const desiredPosition = mockOpportunitiesData?.desiredPosition ?? null;
 
       const coreInfo = {
         name,
         location,
+        desiredPosition,
         githubId: github,
         englishLevel,
         about,
@@ -243,7 +246,7 @@ class CVPage extends React.Component<Props, State> {
     const contactsTransformed = contacts ? this.getContactsData(contacts) : [];
 
     const personalData = {
-      title: '',
+      title: coreInfo?.desiredPosition,
       name: coreInfo?.name,
       image: `https://github.com/${coreInfo?.githubId}.png?size=96`,
       contacts: contactsTransformed,
@@ -302,7 +305,7 @@ class CVPage extends React.Component<Props, State> {
           type: 'common-list',
           title: 'RSSchool courses',
           icon: 'tasks',
-          items: this.getCoursesGeneralInfo(coursesStats),
+          items: this.getCoursesGeneralInfo(coursesStats)
         }
       : null;
 
